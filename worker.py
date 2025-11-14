@@ -24,18 +24,10 @@ print("DEBUG: TIDB_CA_PATH =", TIDB_CA_PATH)
 print("DEBUG: REDIS_URL =", REDIS_URL)
 print("DEBUG: REDIS_QUEUE =", REDIS_QUEUE)
 
-# SSL settings for TiDB Cloud (same logic as models.py)
-def _build_connect_args():
-    """Build connect_args based on SSL configuration"""
-    if TIDB_CA_PATH:
-        return {"ssl": {"ca": TIDB_CA_PATH}}
-    FORCE_SSL = os.getenv("FORCE_SSL", "false").lower() in ("1", "true", "yes")
-    if FORCE_SSL:
-        return {"ssl": {}}
-    return {}
+# SSL settings for TiDB Cloud
+connect_args = {"ssl": {"ca": TIDB_CA_PATH}}
 
 # Create SQLAlchemy engine + session
-connect_args = _build_connect_args()
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(bind=engine)
 
