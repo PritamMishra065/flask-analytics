@@ -1,0 +1,56 @@
+services:
+  # Flask Web Service
+  - type: web
+    name: flask-analytics-api
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    envVars:
+      - key: FLASK_HOST
+        value: 0.0.0.0
+      - key: FLASK_PORT
+        value: $PORT
+      - key: REDIS_URL
+        fromDatabase:
+          name: redis-analytics
+          property: connectionString
+      - key: REDIS_QUEUE_NAME
+        value: event_queue
+      - key: DATABASE_URL
+        fromDatabase:
+          name: postgres-analytics
+          property: connectionString
+      - key: FORCE_SSL
+        value: false
+
+  # Background Worker
+  - type: worker
+    name: flask-analytics-worker
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python worker.py
+    envVars:
+      - key: REDIS_URL
+        fromDatabase:
+          name: redis-analytics
+          property: connectionString
+      - key: REDIS_QUEUE_NAME
+        value: event_queue
+      - key: DATABASE_URL
+        fromDatabase:
+          name: postgres-analytics
+          property: connectionString
+      - key: FORCE_SSL
+        value: false
+
+databases:
+  # PostgreSQL Database
+  - name: postgres-analytics
+    databaseName: analytics_db
+    user: analytics_user
+    plan: free
+
+  # Redis Cache
+  - name: redis-analytics
+    plan: free
+
