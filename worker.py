@@ -35,10 +35,11 @@ SessionLocal = sessionmaker(bind=engine)
 # rediss:// protocol automatically enables SSL, but we need to configure it properly
 if REDIS_URL and REDIS_URL.startswith('rediss://'):
     # Upstash Redis with SSL
+    import ssl
     r = redis.from_url(
         REDIS_URL,
         decode_responses=True,
-        ssl_cert_reqs=None  # Upstash doesn't require client certificates
+        ssl_cert_reqs=ssl.CERT_NONE  # Upstash doesn't require client certificates
     )
 else:
     # Regular Redis without SSL
