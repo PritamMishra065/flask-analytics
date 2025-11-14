@@ -1,0 +1,12 @@
+app = "flask-analytics-worker"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile.worker"
+
+[env]
+  REDIS_QUEUE_NAME = "python-proj"
+  FORCE_SSL = "false"
+
+# No HTTP service needed for worker
+# This is a background process
