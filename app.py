@@ -115,8 +115,7 @@ def stats():
         session.close()
 
 if __name__ == "__main__":
-    app.run(
-        host=os.getenv("FLASK_HOST"),
-        port=int(os.getenv("FLASK_PORT")),
-        debug=True
-    )
+    # Use PORT environment variable (Railway, Heroku, etc.) or fallback to FLASK_PORT or 5000
+    port = int(os.getenv("PORT") or os.getenv("FLASK_PORT", "5000"))
+    host = os.getenv("FLASK_HOST", "0.0.0.0")
+    app.run(host=host, port=port, debug=False)
