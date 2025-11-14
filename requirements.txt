@@ -1,6 +1,14 @@
+# Web Framework
 Flask==2.3.2
-redis==4.6.0
+gunicorn==21.2.0
+
+# Database
 SQLAlchemy==2.0.20
-python-dotenv==1.0.0
 pymysql==1.0.3
 psycopg2-binary==2.9.9
+
+# Cache/Queue
+redis==4.6.0
+
+# Environment Variables
+python-dotenv==1.0.0
