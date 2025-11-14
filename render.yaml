@@ -10,18 +10,21 @@ services:
         value: 0.0.0.0
       - key: FLASK_PORT
         value: $PORT
+      # Use external Redis - set REDIS_URL manually in Render dashboard
+      # Format: redis://username:password@host:port or redis://host:port
       - key: REDIS_URL
-        fromDatabase:
-          name: redis-analytics
-          property: connectionString
+        sync: false  # Set this manually in dashboard
       - key: REDIS_QUEUE_NAME
         value: event_queue
+      # Use external Database - set DATABASE_URL manually in Render dashboard
+      # Format: mysql+pymysql://user:pass@host:port/db or postgresql://user:pass@host:port/db
       - key: DATABASE_URL
-        fromDatabase:
-          name: postgres-analytics
-          property: connectionString
+        sync: false  # Set this manually in dashboard
       - key: FORCE_SSL
         value: false
+      # If using TiDB or SSL-enabled database, set TIDB_CA_PATH
+      - key: TIDB_CA_PATH
+        sync: false  # Optional: Set if using SSL certificate
 
   # Background Worker
   - type: worker
@@ -31,26 +34,25 @@ services:
     startCommand: python worker.py
     envVars:
       - key: REDIS_URL
-        fromDatabase:
-          name: redis-analytics
-          property: connectionString
+        sync: false  # Set this manually in dashboard
       - key: REDIS_QUEUE_NAME
         value: event_queue
       - key: DATABASE_URL
-        fromDatabase:
-          name: postgres-analytics
-          property: connectionString
+        sync: false  # Set this manually in dashboard
       - key: FORCE_SSL
         value: false
+      - key: TIDB_CA_PATH
+        sync: false  # Optional: Set if using SSL certificate
 
-databases:
-  # PostgreSQL Database
-  - name: postgres-analytics
-    databaseName: analytics_db
-    user: analytics_user
-    plan: free
+# Note: If using external database/Redis, skip the databases section below
+# and set connection strings manually in Render dashboard
 
-  # Redis Cache
-  - name: redis-analytics
-    plan: free
+# Uncomment below only if you want Render to create new databases
+# databases:
+#   - name: postgres-analytics
+#     databaseName: analytics_db
+#     user: analytics_user
+#     plan: free
+#   - name: redis-analytics
+#     plan: free
 
