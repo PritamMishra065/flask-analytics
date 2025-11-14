@@ -31,8 +31,18 @@ connect_args = {"ssl": {"ca": TIDB_CA_PATH}}
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
 SessionLocal = sessionmaker(bind=engine)
 
-# Redis connection
-r = redis.from_url(REDIS_URL, decode_responses=True)
+# Redis connection with SSL support for Upstash
+# rediss:// protocol automatically enables SSL, but we need to configure it properly
+if REDIS_URL and REDIS_URL.startswith('rediss://'):
+    # Upstash Redis with SSL
+    r = redis.from_url(
+        REDIS_URL,
+        decode_responses=True,
+        ssl_cert_reqs=None  # Upstash doesn't require client certificates
+    )
+else:
+    # Regular Redis without SSL
+    r = redis.from_url(REDIS_URL, decode_responses=True)
 
 # Event parser
 def parse_event(data):
