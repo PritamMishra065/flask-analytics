@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Analytics Dashboard</h1>
+            <p class="subtitle">Real-time event analytics and insights</p>
+        </header>
+
+        <div class="dashboard">
+            <!-- Query Form -->
+            <section class="query-section">
+                <div class="card">
+                    <h2>Query Analytics</h2>
+                    <form id="statsForm">
+                        <div class="form-group">
+                            <label for="siteId">Site ID</label>
+                            <input 
+                                type="text" 
+                                id="siteId" 
+                                name="site_id" 
+                                placeholder="Enter site ID" 
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Date</label>
+                            <input 
+                                type="date" 
+                                id="date" 
+                                name="date" 
+                                value=""
+                            >
+                            <small>Leave empty for today's date</small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <span class="btn-text">Get Stats</span>
+                            <span class="btn-loader" style="display: none;">Loading...</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Stats Display -->
+            <section class="stats-section" id="statsSection" style="display: none;">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">👁️</div>
+                        <div class="stat-content">
+                            <h3>Total Views</h3>
+                            <p class="stat-value" id="totalViews">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <h3>Unique Users</h3>
+                            <p class="stat-value" id="uniqueUsers">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card top-paths-card">
+                    <h2>📊 Top Pages</h2>
+                    <div id="topPaths" class="top-paths-list">
+                        <!-- Top paths will be inserted here -->
+                    </div>
+                </div>
+
+                <div class="card info-card">
+                    <h3>ℹ️ Query Information</h3>
+                    <div class="info-details">
+                        <p><strong>Site ID:</strong> <span id="querySiteId">-</span></p>
+                        <p><strong>Date:</strong> <span id="queryDate">-</span></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Event Ingestion Form -->
+            <section class="ingest-section">
+                <div class="card">
+                    <h2>Send Test Event</h2>
+                    <form id="eventForm">
+                        <div class="form-group">
+                            <label for="eventSiteId">Site ID</label>
+                            <input 
+                                type="text" 
+                                id="eventSiteId" 
+                                name="site_id" 
+                                placeholder="Enter site ID" 
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="eventType">Event Type</label>
+                            <input 
+                                type="text" 
+                                id="eventType" 
+                                name="event_type" 
+                                placeholder="e.g., pageview, click" 
+                                required
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="path">Path (optional)</label>
+                            <input 
+                                type="text" 
+                                id="path" 
+                                name="path" 
+                                placeholder="e.g., /home, /about"
+                            >
+                        </div>
+                        <div class="form-group">
+                            <label for="userId">User ID (optional)</label>
+                            <input 
+                                type="text" 
+                                id="userId" 
+                                name="user_id" 
+                                placeholder="e.g., user123"
+                            >
+                        </div>
+                        <button type="submit" class="btn btn-secondary">
+                            <span class="btn-text">Send Event</span>
+                            <span class="btn-loader" style="display: none;">Sending...</span>
+                        </button>
+                    </form>
+                    <div id="eventStatus" class="status-message" style="display: none;"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
