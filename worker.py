@@ -2,6 +2,7 @@
 import os
 import json
 import time
+import sys
 from datetime import datetime
 from dotenv import load_dotenv
 import redis
@@ -25,7 +26,7 @@ print("DEBUG: REDIS_URL =", REDIS_URL)
 print("DEBUG: REDIS_QUEUE =", REDIS_QUEUE)
 
 # SSL settings for TiDB Cloud
-connect_args = {"ssl": {"ca": TIDB_CA_PATH}}
+connect_args = {"ssl": {"ca": TIDB_CA_PATH}} if TIDB_CA_PATH else {}
 
 # Create SQLAlchemy engine + session
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
@@ -62,10 +63,33 @@ def parse_event(data):
     )
 
 def main():
+    # Support --max-events argument for GitHub Actions (e.g., python worker.py --max-events 100)
+    max_events = None
+    if len(sys.argv) > 2 and sys.argv[1] == "--max-events":
+        try:
+            max_events = int(sys.argv[2])
+        except ValueError:
+            pass
+    
+    processed = 0
     print("Worker started and connected successfully!")
+    
     while True:
-        item = r.brpop(REDIS_QUEUE, timeout=5)
+        # For GitHub Actions: exit after processing max_events
+        if max_events and processed >= max_events:
+            print(f"Reached max events limit ({max_events}). Exiting.")
+            break
+        
+        # Use timeout for continuous mode, or 0 for GitHub Actions to return immediately if queue is empty
+        timeout = 5 if max_events is None else 0
+        item = r.brpop(REDIS_QUEUE, timeout=timeout)
+        
         if not item:
+            if max_events:
+                # GitHub Actions: exit if queue is empty
+                print(f"Queue empty after processing {processed} events. Exiting.")
+                break
+            # Continuous mode: just wait and retry
             continue
 
         _, raw = item
@@ -77,6 +101,7 @@ def main():
         session.add(event)
         session.commit()
         session.close()
+        processed += 1
 
 if __name__ == "__main__":
     main()
