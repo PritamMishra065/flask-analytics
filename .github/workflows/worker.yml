@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
-  schedule:
-    # Run every 5 minutes to check for events in Redis queue
-    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: worker
+  cancel-in-progress: false
 
 jobs:
   worker:
@@ -25,11 +27,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Run worker (process queue)
+      - name: Run worker (continuously)
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           REDIS_URL: ${{ secrets.REDIS_URL }}
           REDIS_QUEUE_NAME: ${{ secrets.REDIS_QUEUE_NAME }}
           TIDB_CA_PATH: ${{ secrets.TIDB_CA_PATH }}
         run: |
-          python worker.py --max-events 100
+          python worker.py

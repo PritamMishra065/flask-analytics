@@ -63,7 +63,7 @@ def parse_event(data):
     )
 
 def main():
-    # Support --max-events argument for GitHub Actions (e.g., python worker.py --max-events 100)
+    # Support --max-events argument for one-off runs (e.g., python worker.py --max-events 100)
     max_events = None
     if len(sys.argv) > 2 and sys.argv[1] == "--max-events":
         try:
@@ -75,18 +75,17 @@ def main():
     print("Worker started and connected successfully!")
     
     while True:
-        # For GitHub Actions: exit after processing max_events
+        # For one-off runs: exit after processing max_events
         if max_events and processed >= max_events:
             print(f"Reached max events limit ({max_events}). Exiting.")
             break
         
-        # Use timeout for continuous mode, or 0 for GitHub Actions to return immediately if queue is empty
-        timeout = 5 if max_events is None else 0
-        item = r.brpop(REDIS_QUEUE, timeout=timeout)
+        # Always use blocking pop with timeout for continuous operation
+        item = r.brpop(REDIS_QUEUE, timeout=5)
         
         if not item:
+            # For one-off runs: exit if queue is empty
             if max_events:
-                # GitHub Actions: exit if queue is empty
                 print(f"Queue empty after processing {processed} events. Exiting.")
                 break
             # Continuous mode: just wait and retry
@@ -102,6 +101,7 @@ def main():
         session.commit()
         session.close()
         processed += 1
+        print(f"Processed {processed} events total")
 
 if __name__ == "__main__":
     main()
